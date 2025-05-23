@@ -1,10 +1,10 @@
 <?php
-session_start();
+require_once 'includes/session.php';
 require_once 'dbConnect.php';
 
-// Check if user is logged in
-$isLoggedIn = isset($_SESSION['user_id']);
-$currentUser = $isLoggedIn ? $_SESSION['user'] : null;
+checkSessionTimeout();
+$isLoggedIn = isLoggedIn();
+$currentUser = getCurrentUser();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,21 +28,29 @@ $currentUser = $isLoggedIn ? $_SESSION['user'] : null;
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
+                    <?php if (getUserRole() == 'admin' || getUserRole() == 'doctor'): ?>
                     <li class="nav-item">
                         <a class="nav-link" href="patients.php">
                             <i class="fas fa-users"></i> Patients
                         </a>
                     </li>
+                    <?php endif; ?>
+                    
+                    <?php if (getUserRole() == 'admin'): ?>
                     <li class="nav-item">
                         <a class="nav-link" href="doctors.php">
                             <i class="fas fa-user-md"></i> Doctors
                         </a>
                     </li>
+                    <?php endif; ?>
+                    
                     <li class="nav-item">
                         <a class="nav-link" href="appointments.php">
                             <i class="fas fa-calendar-check"></i> Appointments
                         </a>
                     </li>
+                    
+                    <?php if (getUserRole() == 'patient'): ?>
                     <li class="nav-item">
                         <a class="nav-link" href="medical_records.php">
                             <i class="fas fa-file-medical"></i> Medical Records
@@ -53,12 +61,13 @@ $currentUser = $isLoggedIn ? $_SESSION['user'] : null;
                             <i class="fas fa-prescription"></i> Prescriptions
                         </a>
                     </li>
+                    <?php endif; ?>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <span class="nav-link">
-                            <i class="fas fa-user"></i> Welcome, <?php echo htmlspecialchars($currentUser['first_name']); ?>
-                        </span>
+                        <a class="nav-link" href="profile.php">
+                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($currentUser['first_name']); ?>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="logout.php">
@@ -70,5 +79,6 @@ $currentUser = $isLoggedIn ? $_SESSION['user'] : null;
         </div>
     </nav>
     <?php endif; ?>
+    <div class="container mt-4">
 </body>
 </html> 
