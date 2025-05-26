@@ -93,6 +93,22 @@ $doctors = $stmt->fetchAll();
     </nav>
 
     <div class="container mt-4">
+        <!-- Add Patient Search Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4>Search Patient Records</h4>
+                <form action="view_patient_history.php" method="GET" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="patient_id" class="form-label">Patient ID</label>
+                        <input type="number" class="form-control" id="patient_id" name="patient_id" required placeholder="Enter patient ID">
+                    </div>
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">Search Patient History</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Doctor Management</h2>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDoctorModal">

@@ -29,34 +29,69 @@ try {
     // Handle writing a new prescription
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['write_prescription'])) {
         $patientId = $_POST['patient_id'] ?? '';
-        $medicationDetails = $_POST['medication_details'] ?? '';
-        $dosageInstructions = $_POST['dosage_instructions'] ?? '';
-        $startDate = $_POST['start_date'] ?? '';
-        $endDate = $_POST['end_date'] ?? null; // End date is optional
-        $status = 'Active'; // Initial status for a new prescription
+        $medication = $_POST['medication'] ?? '';
+        $dosage = $_POST['dosage'] ?? '';
+        $instructions = $_POST['instructions'] ?? '';
+        $status = 'Active';
 
+        // Debug information
+        echo '<div class="alert alert-info">';
+        echo "Debug Info:<br>";
+        echo "Doctor ID: " . $doctorId . "<br>";
+        echo "Patient ID: " . $patientId . "<br>";
+        
         // Basic validation
         if (empty($patientId)) $errors[] = 'Patient is required.';
-        if (empty($medicationDetails)) $errors[] = 'Medication details are required.';
-        if (empty($startDate)) $errors[] = 'Start date is required.';
+        if (empty($medication)) $errors[] = 'Medication is required.';
 
         if (empty($errors)) {
             try {
-                $stmt = $pdo->prepare("INSERT INTO prescriptions (patient_id, doctor_id, medication_details, dosage_instructions, start_date, end_date, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                $stmt->execute([$patientId, $doctorId, $medicationDetails, $dosageInstructions, $startDate, $endDate, $status]);
-
-                $success = 'Prescription written successfully!';
-                // Clear form fields after successful submission (optional)
-                $_POST = []; 
-
+                // First verify if patient exists
+                $checkPatient = $pdo->prepare("SELECT id FROM patients WHERE id = ?");
+                $checkPatient->execute([$patientId]);
+                $patientExists = $checkPatient->fetch();
+                
+                echo "Patient check result: " . ($patientExists ? "Found" : "Not found") . "<br>";
+                
+                if (!$patientExists) {
+                    $errors[] = "Invalid patient ID selected.";
+                } else {
+                    $stmt = $pdo->prepare("
+                        INSERT INTO prescriptions 
+                        (patient_id, doctor_id, medication, dosage, instructions, status, prescription_date) 
+                        VALUES (?, ?, ?, ?, ?, ?, CURRENT_DATE)
+                    ");
+                    
+                    $result = $stmt->execute([$patientId, $doctorId, $medication, $dosage, $instructions, $status]);
+                    
+                    if ($result) {
+                        $success = 'Prescription written successfully!';
+                        echo "Prescription saved successfully. Last Insert ID: " . $pdo->lastInsertId() . "<br>";
+                        // Clear form fields after successful submission
+                        $_POST = [];
+                    } else {
+                        $errors[] = "Failed to save prescription.";
+                        echo "SQL Error Info: ";
+                        print_r($stmt->errorInfo());
+                    }
+                }
             } catch (PDOException $e) {
                 $errors[] = "Database Error: " . $e->getMessage();
+                echo "Exception: " . $e->getMessage() . "<br>";
             }
         }
+        echo '</div>';
     }
 
-    // Fetch doctor's prescriptions (placeholder)
-    $stmt = $pdo->prepare("SELECT p.*, u.first_name as patient_first_name, u.last_name as patient_last_name FROM prescriptions p JOIN patients pa ON p.patient_id = pa.id JOIN users u ON pa.user_id = u.id WHERE p.doctor_id = ? ORDER BY p.created_at DESC");
+    // Fetch doctor's prescriptions
+    $stmt = $pdo->prepare("
+        SELECT p.*, u.first_name as patient_first_name, u.last_name as patient_last_name 
+        FROM prescriptions p 
+        JOIN patients pa ON p.patient_id = pa.id 
+        JOIN users u ON pa.user_id = u.id 
+        WHERE p.doctor_id = ? 
+        ORDER BY p.created_at DESC
+    ");
     $stmt->execute([$doctorId]);
     $prescriptions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -137,38 +172,54 @@ try {
                             <h5 class="mb-0">Write New Prescription</h5>
                         </div>
                         <div class="card-body">
-                            <form method="POST" action="prescriptions.php">
+                            <form method="POST" action="prescriptions.php?action=write">
                                 <input type="hidden" name="write_prescription" value="1">
-                                <div class="mb-3">
-                                    <label for="patient_id" class="form-label">Select Patient</label>
-                                    <select class="form-select" id="patient_id" name="patient_id" required>
-                                        <option value="">-- Select a Patient --</option>
-                                        <?php foreach ($patients as $patient): ?>
-                                            <option value="<?php echo htmlspecialchars($patient['patient_id']); ?>">
-                                                <?php echo htmlspecialchars($patient['first_name'] . ' ' . $patient['last_name']); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="medication_details" class="form-label">Medication Details</label>
-                                    <textarea class="form-control" id="medication_details" name="medication_details" rows="3" required></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="dosage_instructions" class="form-label">Dosage Instructions</label>
-                                    <textarea class="form-control" id="dosage_instructions" name="dosage_instructions" rows="3"></textarea>
-                                </div>
-                                <div class="row">
+                                <?php
+                                // Debug information
+                                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                                    echo '<div class="alert alert-info">';
+                                    echo 'POST Data: ';
+                                    print_r($_POST);
+                                    echo '</div>';
+                                }
+                                ?>
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label for="start_date" class="form-label">Start Date</label>
-                                        <input type="date" class="form-control" id="start_date" name="start_date" required>
+                                        <label for="patient_id_search" class="form-label">Search Patient by ID</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="patient_id_search" placeholder="Enter Patient ID">
+                                            <button type="button" class="btn btn-primary" onclick="searchPatient()">Search</button>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="end_date" class="form-label">End Date (Optional)</label>
-                                        <input type="date" class="form-control" id="end_date" name="end_date">
+                                        <label for="patient_id" class="form-label">Select Patient</label>
+                                        <select class="form-select" id="patient_id" name="patient_id" required>
+                                            <option value="">-- Select a Patient --</option>
+                                            <?php foreach ($patients as $patient): ?>
+                                                <option value="<?php echo htmlspecialchars($patient['patient_id']); ?>" 
+                                                        data-id="<?php echo htmlspecialchars($patient['patient_id']); ?>">
+                                                    <?php echo htmlspecialchars($patient['first_name'] . ' ' . $patient['last_name']); ?> 
+                                                    (ID: <?php echo htmlspecialchars($patient['patient_id']); ?>)
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary mt-3">Submit Prescription</button>
+                                <div class="mb-3">
+                                    <label for="medication" class="form-label">Medication</label>
+                                    <input type="text" class="form-control" id="medication" name="medication" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="dosage" class="form-label">Dosage</label>
+                                    <input type="text" class="form-control" id="dosage" name="dosage" required placeholder="e.g., 500mg twice daily">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="instructions" class="form-label">Instructions</label>
+                                    <textarea class="form-control" id="instructions" name="instructions" rows="3" placeholder="Special instructions for the patient"></textarea>
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">Save Prescription</button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -191,10 +242,9 @@ try {
                                     <thead>
                                         <tr>
                                             <th>Patient</th>
-                                            <th>Medication Details</th>
+                                            <th>Medication</th>
                                             <th>Dosage</th>
-                                            <th>Start Date</th>
-                                            <th>End Date</th>
+                                            <th>Instructions</th>
                                             <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
@@ -203,10 +253,9 @@ try {
                                         <?php foreach ($prescriptions as $prescription): ?>
                                             <tr>
                                                 <td><?php echo htmlspecialchars($prescription['patient_first_name'] . ' ' . $prescription['patient_last_name']); ?></td>
-                                                <td><?php echo nl2br(htmlspecialchars($prescription['medication_details'])); ?></td>
-                                                <td><?php echo nl2br(htmlspecialchars($prescription['dosage_instructions'] ?? 'N/A')); ?></td>
-                                                <td><?php echo date('M d, Y', strtotime($prescription['start_date'])); ?></td>
-                                                <td><?php echo $prescription['end_date'] ? date('M d, Y', strtotime($prescription['end_date'])) : 'Ongoing'; ?></td>
+                                                <td><?php echo nl2br(htmlspecialchars($prescription['medication'])); ?></td>
+                                                <td><?php echo nl2br(htmlspecialchars($prescription['dosage'])); ?></td>
+                                                <td><?php echo nl2br(htmlspecialchars($prescription['instructions'] ?? 'N/A')); ?></td>
                                                 <td>
                                                     <span class="badge bg-<?php echo $prescription['status'] === 'Active' ? 'success' : ($prescription['status'] === 'Completed' ? 'secondary' : 'danger'); ?>">
                                                         <?php echo htmlspecialchars($prescription['status']); ?>
@@ -230,5 +279,26 @@ try {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../script.js"></script>
+    <script>
+    function searchPatient() {
+        const searchId = document.getElementById('patient_id_search').value;
+        const select = document.getElementById('patient_id');
+        const options = select.options;
+        let found = false;
+        
+        for (let i = 0; i < options.length; i++) {
+            const optionId = options[i].getAttribute('data-id');
+            if (optionId === searchId) {
+                select.selectedIndex = i;
+                found = true;
+                break;
+            }
+        }
+        
+        if (!found) {
+            alert('Patient not found with ID: ' + searchId);
+        }
+    }
+    </script>
 </body>
 </html> 

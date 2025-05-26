@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS doctors (
     specialization VARCHAR(100) NOT NULL,
     qualification VARCHAR(200) NOT NULL,
     experience INT NOT NULL,
+    hospital VARCHAR(200) NOT NULL,
+    location VARCHAR(200) NOT NULL,
+    background TEXT,
     available_days VARCHAR(200),
     consultation_fee DECIMAL(10,2),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -42,16 +45,16 @@ CREATE TABLE IF NOT EXISTS patients (
 -- Appointments table
 CREATE TABLE IF NOT EXISTS appointments (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    patient_id INT NOT NULL,
     doctor_id INT NOT NULL,
+    patient_id INT NOT NULL,
     appointment_date DATE NOT NULL,
     appointment_time TIME NOT NULL,
-    status ENUM('pending', 'confirmed', 'cancelled', 'completed') DEFAULT 'pending',
     reason TEXT,
-    notes TEXT,
+    status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id),
+    FOREIGN KEY (patient_id) REFERENCES patients(id)
 );
 
 -- Prescriptions table
@@ -92,4 +95,34 @@ CREATE TABLE IF NOT EXISTS medical_records (
     file_path VARCHAR(255),
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
+);
+
+-- Create ambulances table
+CREATE TABLE IF NOT EXISTS ambulances (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    vehicle_number VARCHAR(50) NOT NULL,
+    vehicle_type VARCHAR(100) NOT NULL,
+    driver_name VARCHAR(100) NOT NULL,
+    driver_contact VARCHAR(20) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    price_per_km DECIMAL(10,2) NOT NULL,
+    status ENUM('available', 'busy', 'maintenance') DEFAULT 'available',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Create ambulance_bookings table
+CREATE TABLE IF NOT EXISTS ambulance_bookings (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    ambulance_id INT NOT NULL,
+    patient_id INT NOT NULL,
+    pickup_location VARCHAR(255) NOT NULL,
+    destination VARCHAR(255) NOT NULL,
+    booking_date DATE NOT NULL,
+    booking_time TIME NOT NULL,
+    status ENUM('pending', 'confirmed', 'completed', 'cancelled') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (ambulance_id) REFERENCES ambulances(id),
+    FOREIGN KEY (patient_id) REFERENCES patients(id)
 ); 

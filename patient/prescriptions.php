@@ -33,7 +33,17 @@ try {
 // Fetch patient's prescriptions
 $prescriptions = [];
 try {
-    $stmt = $pdo->prepare("SELECT p.*, u.first_name as doctor_first_name, u.last_name as doctor_last_name FROM prescriptions p JOIN doctors d ON p.doctor_id = d.id JOIN users u ON d.user_id = u.id WHERE p.patient_id = ? ORDER BY p.prescription_date DESC");
+    $stmt = $pdo->prepare("
+        SELECT p.*, 
+               d.id as doctor_id,
+               u.first_name as doctor_first_name, 
+               u.last_name as doctor_last_name 
+        FROM prescriptions p 
+        JOIN doctors d ON p.doctor_id = d.id 
+        JOIN users u ON d.user_id = u.id 
+        WHERE p.patient_id = ? 
+        ORDER BY p.prescription_date DESC
+    ");
     $stmt->execute([$patientId]);
     $prescriptions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -91,8 +101,8 @@ try {
                                     <table class="table table-striped">
                                         <thead>
                                             <tr>
-                                                <th>Doctor</th>
                                                 <th>Date</th>
+                                                <th>Doctor</th>
                                                 <th>Medication</th>
                                                 <th>Dosage</th>
                                                 <th>Instructions</th>
@@ -103,15 +113,20 @@ try {
                                         <tbody>
                                             <?php foreach ($prescriptions as $prescription): ?>
                                                 <tr>
+                                                    <td><?php echo date('M d, Y', strtotime($prescription['prescription_date'])); ?></td>
                                                     <td><?php echo htmlspecialchars($prescription['doctor_first_name'] . ' ' . $prescription['doctor_last_name']); ?></td>
-                                                    <td><?php echo htmlspecialchars($prescription['prescription_date']); ?></td>
                                                     <td><?php echo htmlspecialchars($prescription['medication']); ?></td>
                                                     <td><?php echo htmlspecialchars($prescription['dosage']); ?></td>
-                                                    <td><?php echo htmlspecialchars($prescription['instructions']); ?></td>
-                                                     <td><?php echo htmlspecialchars($prescription['status']); ?></td>
+                                                    <td><?php echo nl2br(htmlspecialchars($prescription['instructions'] ?? 'N/A')); ?></td>
                                                     <td>
-                                                        <!-- Add action buttons here (e.g., View Details) -->
-                                                        <a href="view_prescription.php?id=<?php echo $prescription['id']; ?>" class="btn btn-sm btn-primary">View</a>
+                                                        <span class="badge bg-<?php echo $prescription['status'] === 'Active' ? 'success' : 'secondary'; ?>">
+                                                            <?php echo htmlspecialchars($prescription['status']); ?>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <a href="view_prescription.php?id=<?php echo $prescription['id']; ?>" class="btn btn-sm btn-primary">
+                                                            <i class="fas fa-eye"></i> View
+                                                        </a>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>

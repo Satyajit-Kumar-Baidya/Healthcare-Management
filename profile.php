@@ -26,7 +26,8 @@ if ($user['role'] === 'patient') {
                 'dob' => '',
                 'gender' => '',
                 'emergency_contact' => '',
-                'blood_group' => ''
+                'blood_group' => '',
+                'patient_id' => $patientData['id']
             ], $profileData, $patientData);
         }
     } catch (PDOException $e) {
@@ -43,7 +44,12 @@ if ($user['role'] === 'patient') {
                 'specialization' => '',
                 'qualification' => '',
                 'experience' => '',
-                'availability' => ''
+                'availability' => '',
+                'hospital' => '',
+                'location' => '',
+                'consultation_fee' => '',
+                'background' => '',
+                'available_days' => ''
             ], $profileData, $doctorData);
         }
     } catch (PDOException $e) {
@@ -94,17 +100,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                  $qualification = $_POST['qualification'] ?? '';
                  $experience = $_POST['experience'] ?? '';
                  $availability = $_POST['availability'] ?? '';
+                 $hospital = $_POST['hospital'] ?? '';
+                 $location = $_POST['location'] ?? '';
+                 $consultation_fee = $_POST['consultation_fee'] ?? '';
+                 $background = $_POST['background'] ?? '';
+                 $available_days = $_POST['available_days'] ?? '';
 
                  // Check if doctor record exists before updating
                  $stmtCheck = $pdo->prepare("SELECT id FROM doctors WHERE user_id = ? LIMIT 1");
                  $stmtCheck->execute([$user['id']]);
                  if ($stmtCheck->fetchColumn()) {
-                    $stmt = $pdo->prepare("UPDATE doctors SET specialization = ?, qualification = ?, experience = ?, availability = ? WHERE user_id = ?");
-                    $stmt->execute([$specialization, $qualification, $experience, $availability, $user['id']]);
+                    $stmt = $pdo->prepare("UPDATE doctors SET specialization = ?, qualification = ?, experience = ?, availability = ?, hospital = ?, location = ?, consultation_fee = ?, background = ?, available_days = ? WHERE user_id = ?");
+                    $stmt->execute([$specialization, $qualification, $experience, $availability, $hospital, $location, $consultation_fee, $background, $available_days, $user['id']]);
                  } else {
                      // If doctor record doesn't exist, create it
-                     $stmtInsert = $pdo->prepare("INSERT INTO doctors (user_id, specialization, qualification, experience, availability) VALUES (?, ?, ?, ?, ?)");
-                     $stmtInsert->execute([$user['id'], $specialization, $qualification, $experience, $availability]);
+                     $stmtInsert = $pdo->prepare("INSERT INTO doctors (user_id, specialization, qualification, experience, availability, hospital, location, consultation_fee, background, available_days) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                     $stmtInsert->execute([$user['id'], $specialization, $qualification, $experience, $availability, $hospital, $location, $consultation_fee, $background, $available_days]);
                  }
             }
 
@@ -125,7 +136,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                         'dob' => '',
                         'gender' => '',
                         'emergency_contact' => '',
-                        'blood_group' => ''
+                        'blood_group' => '',
+                        'patient_id' => $patientData['id']
                     ], $profileData, $patientData);
                 }
             } elseif ($user['role'] === 'doctor') {
@@ -137,7 +149,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                         'specialization' => '',
                         'qualification' => '',
                         'experience' => '',
-                        'availability' => ''
+                        'availability' => '',
+                        'hospital' => '',
+                        'location' => '',
+                        'consultation_fee' => '',
+                        'background' => '',
+                        'available_days' => ''
                     ], $profileData, $doctorData);
                 }
             }
@@ -199,93 +216,129 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             <!-- Main Content -->
             <div class="col-md-9 col-lg-10 main-content">
                 <div class="welcome-section">
-                    <h2>User Profile</h2>
-                    <p>View and update your profile information.</p>
+                    <h2>Welcome, <?php echo htmlspecialchars($profileData['first_name']); ?>!</h2>
+                    <?php if ($user['role'] === 'patient' && isset($profileData['id'])): ?>
+                        <p class="mb-0">Your Patient ID: <strong><?php echo htmlspecialchars($profileData['id']); ?></strong></p>
+                        <small class="text-muted">Keep this ID handy - doctors will use it to access your medical records.</small>
+                    <?php endif; ?>
                 </div>
 
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Profile Details</h5>
+                <?php if (isset($success_message)): ?>
+                    <div class="alert alert-success">
+                        <?php echo htmlspecialchars($success_message); ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (isset($error_message)): ?>
+                    <div class="alert alert-danger">
+                        <?php echo htmlspecialchars($error_message); ?>
+                    </div>
+                <?php endif; ?>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title mb-0">Profile Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <?php if ($user['role'] === 'patient' && isset($profileData['id'])): ?>
+                            <div class="alert alert-info mb-4">
+                                <strong>Your Patient ID:</strong> <?php echo htmlspecialchars($profileData['id']); ?>
+                                <br>
+                                <small class="text-muted">This ID is required when doctors need to access your medical records.</small>
                             </div>
-                            <div class="card-body">
-                                <?php if (!empty($errors)): ?>
-                                    <div class="alert alert-danger">
-                                        <?php foreach($errors as $error): ?>
-                                            <p><?php echo $error; ?></p>
-                                        <?php endforeach; ?>
-                                    </div>
-                                <?php endif; ?>
-                                <?php if (isset($success_message)): ?>
-                                    <div class="alert alert-success">
-                                        <?php echo $success_message; ?>
-                                    </div>
-                                <?php endif; ?>
+                        <?php endif; ?>
 
-                                <form action="profile.php" method="POST">
-                                    <div class="mb-3">
-                                        <label for="first_name" class="form-label">First Name</label>
-                                        <input type="text" class="form-control" id="first_name" name="first_name" value="<?php echo htmlspecialchars($profileData['first_name'] ?? ''); ?>" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="last_name" class="form-label">Last Name</label>
-                                        <input type="text" class="form-control" id="last_name" name="last_name" value="<?php echo htmlspecialchars($profileData['last_name'] ?? ''); ?>" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="email" class="form-label">Email address</label>
-                                        <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($profileData['email'] ?? ''); ?>" required>
-                                    </div>
+                        <form action="profile.php" method="POST">
+                            <div class="mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="<?php echo htmlspecialchars($profileData['first_name'] ?? ''); ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="<?php echo htmlspecialchars($profileData['last_name'] ?? ''); ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email address</label>
+                                <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($profileData['email'] ?? ''); ?>" required>
+                            </div>
 
-                                    <?php if ($user['role'] === 'patient'): ?>
+                            <?php if ($user['role'] === 'patient'): ?>
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="address" name="address" value="<?php echo htmlspecialchars($profileData['address'] ?? ''); ?>">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="dob" class="form-label">Date of Birth</label>
+                                    <input type="date" class="form-control" id="dob" name="dob" value="<?php echo htmlspecialchars($profileData['dob'] ?? ''); ?>">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="gender" class="form-label">Gender</label>
+                                    <select class="form-select" id="gender" name="gender">
+                                        <option value="">Select Gender</option>
+                                        <option value="Male" <?php echo ((($profileData['gender'] ?? '') === 'Male')) ? 'selected' : ''; ?>>Male</option>
+                                        <option value="Female" <?php echo ((($profileData['gender'] ?? '') === 'Female')) ? 'selected' : ''; ?>>Female</option>
+                                        <option value="Other" <?php echo ((($profileData['gender'] ?? '') === 'Other')) ? 'selected' : ''; ?>>Other</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="emergency_contact" class="form-label">Emergency Contact</label>
+                                    <input type="text" class="form-control" id="emergency_contact" name="emergency_contact" value="<?php echo htmlspecialchars($profileData['emergency_contact'] ?? ''); ?>">
+                                </div>
+                                 <div class="mb-3">
+                                    <label for="blood_group" class="form-label">Blood Group</label>
+                                    <input type="text" class="form-control" id="blood_group" name="blood_group" value="<?php echo htmlspecialchars($profileData['blood_group'] ?? ''); ?>">
+                                </div>
+                            <?php elseif ($user['role'] === 'doctor'): ?>
+                                <div class="row">
+                                    <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="address" class="form-label">Address</label>
-                                            <input type="text" class="form-control" id="address" name="address" value="<?php echo htmlspecialchars($profileData['address'] ?? ''); ?>">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="dob" class="form-label">Date of Birth</label>
-                                            <input type="date" class="form-control" id="dob" name="dob" value="<?php echo htmlspecialchars($profileData['dob'] ?? ''); ?>">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="gender" class="form-label">Gender</label>
-                                            <select class="form-select" id="gender" name="gender">
-                                                <option value="">Select Gender</option>
-                                                <option value="Male" <?php echo ((($profileData['gender'] ?? '') === 'Male')) ? 'selected' : ''; ?>>Male</option>
-                                                <option value="Female" <?php echo ((($profileData['gender'] ?? '') === 'Female')) ? 'selected' : ''; ?>>Female</option>
-                                                <option value="Other" <?php echo ((($profileData['gender'] ?? '') === 'Other')) ? 'selected' : ''; ?>>Other</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="emergency_contact" class="form-label">Emergency Contact</label>
-                                            <input type="text" class="form-control" id="emergency_contact" name="emergency_contact" value="<?php echo htmlspecialchars($profileData['emergency_contact'] ?? ''); ?>">
-                                        </div>
-                                         <div class="mb-3">
-                                            <label for="blood_group" class="form-label">Blood Group</label>
-                                            <input type="text" class="form-control" id="blood_group" name="blood_group" value="<?php echo htmlspecialchars($profileData['blood_group'] ?? ''); ?>">
-                                        </div>
-                                    <?php elseif ($user['role'] === 'doctor'): ?>
-                                         <div class="mb-3">
                                             <label for="specialization" class="form-label">Specialization</label>
-                                            <input type="text" class="form-control" id="specialization" name="specialization" value="<?php echo htmlspecialchars($profileData['specialization'] ?? ''); ?>">
+                                            <input type="text" class="form-control" id="specialization" name="specialization" value="<?php echo htmlspecialchars($profileData['specialization'] ?? ''); ?>" required>
                                         </div>
-                                         <div class="mb-3">
-                                            <label for="qualification" class="form-label">Qualification</label>
-                                            <input type="text" class="form-control" id="qualification" name="qualification" value="<?php echo htmlspecialchars($profileData['qualification'] ?? ''); ?>">
+                                        <div class="mb-3">
+                                            <label for="qualification" class="form-label">Qualifications</label>
+                                            <input type="text" class="form-control" id="qualification" name="qualification" value="<?php echo htmlspecialchars($profileData['qualification'] ?? ''); ?>" required placeholder="e.g. MBBS, MD, MS">
                                         </div>
-                                         <div class="mb-3">
-                                            <label for="experience" class="form-label">Experience</label>
-                                            <input type="text" class="form-control" id="experience" name="experience" value="<?php echo htmlspecialchars($profileData['experience'] ?? ''); ?>">
+                                        <div class="mb-3">
+                                            <label for="experience" class="form-label">Years of Experience</label>
+                                            <input type="number" class="form-control" id="experience" name="experience" value="<?php echo htmlspecialchars($profileData['experience'] ?? ''); ?>" required>
                                         </div>
-                                         <div class="mb-3">
-                                            <label for="availability" class="form-label">Availability</label>
-                                            <input type="text" class="form-control" id="availability" name="availability" value="<?php echo htmlspecialchars($profileData['availability'] ?? ''); ?>">
+                                        <div class="mb-3">
+                                            <label for="hospital" class="form-label">Hospital/Clinic Name</label>
+                                            <input type="text" class="form-control" id="hospital" name="hospital" value="<?php echo htmlspecialchars($profileData['hospital'] ?? ''); ?>" required>
                                         </div>
-                                    <?php endif; ?>
+                                        <div class="mb-3">
+                                            <label for="location" class="form-label">Location</label>
+                                            <input type="text" class="form-control" id="location" name="location" value="<?php echo htmlspecialchars($profileData['location'] ?? ''); ?>" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="consultation_fee" class="form-label">Consultation Fee</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" class="form-control" id="consultation_fee" name="consultation_fee" value="<?php echo htmlspecialchars($profileData['consultation_fee'] ?? ''); ?>" required>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="available_days" class="form-label">Available Days</label>
+                                            <input type="text" class="form-control" id="available_days" name="available_days" value="<?php echo htmlspecialchars($profileData['available_days'] ?? ''); ?>" placeholder="e.g. Monday-Friday" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="availability" class="form-label">Available Hours</label>
+                                            <input type="text" class="form-control" id="availability" name="availability" value="<?php echo htmlspecialchars($profileData['availability'] ?? ''); ?>" placeholder="e.g. 9:00 AM - 5:00 PM" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="background" class="form-label">Professional Background</label>
+                                            <textarea class="form-control" id="background" name="background" rows="4"><?php echo htmlspecialchars($profileData['background'] ?? ''); ?></textarea>
+                                            <small class="text-muted">Share your professional experience, specialties, and achievements.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
 
-                                    <button type="submit" name="update_profile" class="btn btn-primary">Update Profile</button>
-                                </form>
-                            </div>
-                        </div>
+                            <button type="submit" name="update_profile" class="btn btn-primary">Update Profile</button>
+                        </form>
                     </div>
                 </div>
             </div>

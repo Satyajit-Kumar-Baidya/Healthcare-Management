@@ -63,6 +63,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signup'])) {
     if ($role === 'patient') {
         $stmt = $pdo->prepare("INSERT INTO patients (user_id) VALUES (:user_id)");
         $stmt->execute(['user_id' => $userId]);
+        
+        // Get the patient ID to show in success message
+        $patientId = $pdo->lastInsertId();
+        $_SESSION['registration_success'] = "Registration successful! Your Patient ID is: " . $patientId . ". Please keep this ID safe as doctors will use it to access your medical records.";
     } elseif ($role === 'doctor') {
         $stmt = $pdo->prepare("INSERT INTO doctors (user_id) VALUES (:user_id)");
         $stmt->execute(['user_id' => $userId]);
@@ -108,10 +112,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signin'])) {
             $_SESSION['user_id'] = $user['id'];
 
             // Redirect based on role
-            if ($user['role'] === 'doctor') {
-                header('Location: doctor_dashboard.php');
-            } else {
-                header('Location: dashboard.php');
+            switch ($user['role']) {
+                case 'admin':
+                    header('Location: admin/dashboard.php');
+                    break;
+                case 'doctor':
+                    header('Location: doctor/doctor_dashboard.php');
+                    break;
+                case 'patient':
+                    header('Location: patient/patient_dashboard.php');
+                    break;
+                default:
+                    // If invalid role, destroy session and redirect to login
+                    session_destroy();
+                    $errors['login'] = 'Invalid user role';
+                    $_SESSION['errors'] = $errors;
+                    header('Location: index.php');
             }
             exit();
         } else {

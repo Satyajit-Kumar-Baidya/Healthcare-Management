@@ -30,7 +30,7 @@ try {
     $stats = [
         'today_appointments' => $pdo->query("SELECT COUNT(*) FROM appointments WHERE doctor_id = $doctorId AND DATE(appointment_date) = CURDATE()")->fetchColumn(),
         'total_patients' => $pdo->query("SELECT COUNT(DISTINCT patient_id) FROM appointments WHERE doctor_id = $doctorId")->fetchColumn(),
-        'pending_prescriptions' => $pdo->query("SELECT COUNT(*) FROM prescriptions WHERE doctor_id = $doctorId AND status = 'pending'")->fetchColumn()
+        'pending_prescriptions' => $pdo->query("SELECT COUNT(*) FROM prescriptions WHERE doctor_id = $doctorId")->fetchColumn()
     ];
 } catch (PDOException $e) {
     // Handle database error

@@ -1,22 +1,8 @@
-<?php 
-$host = "localhost";
-$username = 'root';
-$password = '';
-$dbname = 'healthcare_db';
+<?php
+require_once 'dbConnect.php';
 
 try {
-    // First connect without database selected
-    $pdo = new PDO("mysql:host=$host", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // Create database if not exists
-    $pdo->exec("CREATE DATABASE IF NOT EXISTS $dbname");
-    
-    // Connect to the database
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Create users table first (since other tables depend on it)
+    // Create users table first since it's referenced by other tables
     $pdo->exec("CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
         first_name VARCHAR(50) NOT NULL,
@@ -24,7 +10,8 @@ try {
         email VARCHAR(100) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
         role ENUM('admin', 'doctor', 'patient') NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )");
 
     // Create patients table
@@ -118,21 +105,8 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
 
-    // Create ambulance_bookings table
-    $pdo->exec("CREATE TABLE IF NOT EXISTS ambulance_bookings (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        ambulance_id INT NOT NULL,
-        patient_id INT NOT NULL,
-        pickup_location VARCHAR(255) NOT NULL,
-        destination VARCHAR(255) NOT NULL,
-        booking_date DATE NOT NULL,
-        booking_time TIME NOT NULL,
-        status ENUM('pending', 'confirmed', 'completed', 'cancelled') DEFAULT 'pending',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (ambulance_id) REFERENCES ambulances(id),
-        FOREIGN KEY (patient_id) REFERENCES patients(id)
-    )");
-
+    echo "Database tables created successfully!";
 } catch(PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
+    echo "Error creating tables: " . $e->getMessage();
 }
+?> 

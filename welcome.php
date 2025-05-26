@@ -1,7 +1,26 @@
 <?php
 session_start();
-if(isset($_SESSION['user_id'])){
-    header("Location: dashboard.php");
+if(isset($_SESSION['user_id'])) {
+    if(isset($_SESSION['user']['role'])) {
+        switch($_SESSION['user']['role']) {
+            case 'admin':
+                header("Location: admin/dashboard.php");
+                break;
+            case 'doctor':
+                header("Location: doctor/doctor_dashboard.php");
+                break;
+            case 'patient':
+                header("Location: patient/patient_dashboard.php");
+                break;
+            default:
+                header("Location: index.php");
+        }
+    } else {
+        header("Location: index.php");
+    }
+    exit();
+} else {
+    header("Location: index.php");
     exit();
 }
 ?>
