@@ -181,6 +181,7 @@ try {
                     <a href="prescriptions.php"><i class="fas fa-prescription"></i> Prescriptions</a>
                     <a href="payments.php"><i class="fas fa-credit-card"></i> Payments</a>
                     <a href="health-log.php"><i class="fas fa-heartbeat"></i> Health Log</a>
+                    <a href="../chatbot/index.html"><i class="fas fa-robot"></i> ChatBot</a>
                     <a href="profile.php"><i class="fas fa-user"></i> Profile</a>
                     <a href="../logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </nav>

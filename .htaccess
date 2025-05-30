@@ -9,7 +9,7 @@
 php_flag display_errors on
 php_value error_reporting E_ALL
 
-DirectoryIndex welcome.php index.php
+DirectoryIndex index.html welcome.php index.php
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
