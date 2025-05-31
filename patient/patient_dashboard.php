@@ -182,7 +182,7 @@ try {
                     <a href="payments.php"><i class="fas fa-credit-card"></i> Payments</a>
                     <a href="health-log.php"><i class="fas fa-heartbeat"></i> Health Log</a>
                     <a href="../chatbot/index.html"><i class="fas fa-robot"></i> ChatBot</a>
-                    <a href="profile.php"><i class="fas fa-user"></i> Profile</a>
+                    <a href="../profile.php"><i class="fas fa-user"></i> Profile</a>
                     <a href="../logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </nav>
             </div>
@@ -233,8 +233,17 @@ try {
                             <a href="book_appointment.php" class="btn btn-primary w-100 mb-2">
                                 <i class="fas fa-calendar-plus"></i> Book New Appointment
                             </a>
-                            <a href="ambulance_controller.php?action=list" class="btn btn-danger w-100">
+                            <a href="ambulance_controller.php?action=list" class="btn btn-danger w-100 mb-2">
                                 <i class="fas fa-ambulance"></i> Book Ambulance
+                            </a>
+                            <a href="medical-records.php" class="btn btn-info w-100 mb-2">
+                                <i class="fas fa-file-medical"></i> View Medical Records
+                            </a>
+                            <a href="prescriptions.php" class="btn btn-success w-100 mb-2">
+                                <i class="fas fa-prescription"></i> View Prescriptions
+                            </a>
+                            <a href="../blood_bank/index.php" class="btn btn-danger w-100">
+                                <i class="fas fa-tint"></i> Blood Bank
                             </a>
                         </div>
                     </div>

@@ -50,6 +50,18 @@ $currentUser = getCurrentUser();
                         </a>
                     </li>
                     
+                    <li class="nav-item">
+                        <a class="nav-link" href="chatbot.php">
+                            <i class="fas fa-robot"></i> Chatbot
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="blood_bank/index.php">
+                            <i class="fas fa-tint"></i> Blood Bank
+                        </a>
+                    </li>
+                    
                     <?php if (getUserRole() == 'patient'): ?>
                     <li class="nav-item">
                         <a class="nav-link" href="medical_records.php">

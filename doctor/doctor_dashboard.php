@@ -62,7 +62,10 @@ $user = $_SESSION['user'];
                     <a href="schedule.php">
                         <i class="fas fa-clock"></i> My Schedule
                     </a>
-                    <a href="profile.php">
+                    <a href="../blood_bank/index.php">
+                        <i class="fas fa-tint"></i> Blood Bank
+                    </a>
+                    <a href="../profile.php">
                         <i class="fas fa-user-md"></i> My Profile
                     </a>
                     <a href="../logout.php">

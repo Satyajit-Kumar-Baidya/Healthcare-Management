@@ -1,0 +1,2 @@
+Mr.sample 1|A+|Mrsample1@gmail.com|Sample Sample|robert@example.com|3456|2025-05-31 07:29:39
+Mr. Sample2|A-|MrSample2@gmail.com|Sample Sample|robert@example.com|45677|2025-05-31 07:45:00

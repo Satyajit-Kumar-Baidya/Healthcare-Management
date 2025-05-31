@@ -56,13 +56,13 @@ try {
             <div class="col-md-3 col-lg-2 sidebar">
                 <h3 class="text-center mb-4">Healthcare</h3>
                 <nav>
-                    <a href="doctor_dashboard.php"><i class="fas fa-home"></i> Dashboard</a>
-                    <a href="doctor/appointments.php"><i class="fas fa-calendar-check"></i> My Appointments</a>
-                    <a href="doctor/patients.php"><i class="fas fa-procedures"></i> My Patients</a>
-                    <a href="doctor/prescriptions.php"><i class="fas fa-prescription"></i> Prescriptions</a>
-                    <a href="doctor/medical-records.php"><i class="fas fa-file-medical"></i> Medical Records</a>
-                    <a href="profile.php"><i class="fas fa-user"></i> Profile</a>
-                    <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    <a href="/Healthcare-Management/doctor_dashboard.php"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="/Healthcare-Management/doctor/appointments.php"><i class="fas fa-calendar-check"></i> My Appointments</a>
+                    <a href="/Healthcare-Management/doctor/patients.php"><i class="fas fa-procedures"></i> My Patients</a>
+                    <a href="/Healthcare-Management/doctor/prescriptions.php"><i class="fas fa-prescription"></i> Prescriptions</a>
+                    <a href="/Healthcare-Management/doctor/medical-records.php"><i class="fas fa-file-medical"></i> Medical Records</a>
+                    <a href="/Healthcare-Management/profile.php"><i class="fas fa-user"></i> Profile</a>
+                    <a href="/Healthcare-Management/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </nav>
             </div>
 
@@ -120,6 +120,11 @@ try {
                                     <div class="col-md-4 mb-3">
                                         <a href="doctor/medical-records.php?action=add" class="btn btn-info btn-lg w-100">
                                             <i class="fas fa-file-medical"></i> Add Medical Record
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <a href="blood_bank/index.php" class="btn btn-danger btn-lg w-100">
+                                            <i class="fas fa-tint"></i> Blood Bank
                                         </a>
                                     </div>
                                 </div>
