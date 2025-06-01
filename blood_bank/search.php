@@ -55,12 +55,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['blood_type'])) {
             <th>Email</th>
             <th>Phone</th>
             <th>Blood Type</th>
+            <th>Request</th>
         </tr>
         <?php foreach ($results as $donor) {
             echo '<tr>';
             foreach ($donor as $item) {
                 echo '<td>' . htmlspecialchars($item) . '</td>';
             }
+            echo '<td>';
+            if ($is_person || $is_patient) {
+                echo '<form action="request.php" method="get" style="margin:0;"><input type="hidden" name="name" value="'.htmlspecialchars($donor[0]).'">';
+                echo '<input type="hidden" name="blood_type" value="'.htmlspecialchars($donor[4]).'">';
+                echo '<input type="hidden" name="email" value="'.htmlspecialchars($donor[2]).'">';
+                echo '<input type="submit" value="Request"></form>';
+            } else {
+                echo '<span style="color:#888;">Login to request</span>';
+            }
+            echo '</td>';
             echo '</tr>';
         } ?>
     </table>
