@@ -20,6 +20,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <a href="index.php" <?php echo $current_page == 'index.php' ? 'class="active"' : ''; ?>>Home</a>
     <a href="donors.php" <?php echo $current_page == 'donors.php' ? 'class="active"' : ''; ?>>Donor List</a>
     <a href="search.php" <?php echo $current_page == 'search.php' ? 'class="active"' : ''; ?>>Search Donor</a>
+    <a href="blood_stock.php" <?php echo $current_page == 'blood_stock.php' ? 'class="active"' : ''; ?>>Blood Stock</a>
     <?php if ($is_admin || $is_doctor): ?>
         <a href="add_donor.php" <?php echo $current_page == 'add_donor.php' ? 'class="active"' : ''; ?>>Add Donor</a>
         <a href="persons_list.php" <?php echo $current_page == 'persons_list.php' ? 'class="active"' : ''; ?>>View Persons</a>

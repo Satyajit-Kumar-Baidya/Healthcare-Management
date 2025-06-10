@@ -21,6 +21,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($name && $address && $email && $phone && $blood_type) {
         $donor_data = "$name|$address|$email|$phone|$blood_type\n";
         if (file_put_contents('donors.txt', $donor_data, FILE_APPEND)) {
+            // Update blood_stock.txt
+            $stock_file = 'blood_stock.txt';
+            $blood_stock = [];
+            if (file_exists($stock_file)) {
+                $lines = file($stock_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                foreach ($lines as $i => $line) {
+                    if ($i === 0) continue; // skip header
+                    list($bg, $qty, $place) = array_pad(explode('|', $line), 3, '');
+                    $blood_stock[$bg] = ['qty' => (int)$qty, 'place' => $place];
+                }
+            }
+            if (isset($blood_stock[$blood_type])) {
+                $blood_stock[$blood_type]['qty'] += 1;
+            } else {
+                $blood_stock[$blood_type] = ['qty' => 1, 'place' => ''];
+            }
+            // Write back to file
+            $out = "Blood_group|Quantity|Place\n";
+            foreach ($blood_stock as $bg => $info) {
+                $out .= "$bg|{$info['qty']}|{$info['place']}\n";
+            }
+            file_put_contents($stock_file, $out);
             $message = '<div class="success">Donor added successfully!</div>';
         } else {
             $message = '<div class="error">Error adding donor. Please try again.</div>';
